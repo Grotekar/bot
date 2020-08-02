@@ -1,0 +1,17 @@
+{
+    "name": "igor/bot",
+    "description": "bot with various api-messagers",
+    "authors": [
+        {
+            "name": "Igor Petrenko",
+            "email": "igor06.03.1995@gmail.com"
+        }
+    ],
+    "require": {
+        "vkcom/vk-php-sdk": "^5.101",
+        "ext-json": "*"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.2"
+    }
+}
