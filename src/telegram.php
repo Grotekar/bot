@@ -1,33 +1,33 @@
 <?php
-    require_once __DIR__.'/../vendor/autoload.php';
-    require_once __DIR__.'/../config.php';
 
-    $token = TEKEGRAM_API_ACCESS_TOKEN;
-    $repeat = NUMBER_OF_REPETITIONS;
-    $question = QUESTION_FOR_REPEAT;
-    $description = DESCRIPTION;
-    $update_id = -1;
+    namespace Bot\api;
+
+    require_once __DIR__ . '/../vendor/autoload.php';
+
+    $telegram    = new TelegramApi();
+    $update_id   = -1;
+    $repeat      = $telegram->getNumberRepetition();
 
     // Ожидание сообщения
 while (true) {
     // Получить возможное сообщение
-    $response = json_decode(file_get_contents('https://api.telegram.org/bot' . $token . '/getUpdates?offset='
-             . $update_id));
-    // Если ответ существует и это обычное сообщение (не ответ на /repeat
-    if (count($response->result) !== 0 && array_key_exists('message', $response->result[0])) {
+    $response = $telegram->listenEvent($update_id);
+
+    // Если ответ существует и это обычное сообщение (не ответ на /repeat)
+    if ($telegram->typeResponse($response) === 'not_button_click') {
         // Анализировать полученные данные
-        $chat_id = $response->result[0]->message->chat->id;
-        $message = '';
+        $request_params = [
+            'chat_id' => $response->result[0]->message->chat->id,
+        ];
         $keyboard = '';
 
         // Анализ полученного сообщения
         switch ($response->result[0]->message->text) {
             case '/help':
-                $message = urlencode($description);
+                $request_params['text'] = $telegram->getDescription();
                 break;
             case '/repeat':
-                $message = urlencode('Сейчас повторяю ' . $repeat . " раз\n" . $question);
-
+                $request_params['text'] = 'Сейчас повторяю ' . $repeat . " раз\n" . $telegram->getQuestion();
                 $keyboard = json_encode(array(
                     "inline_keyboard" => array(
                         array(
@@ -56,7 +56,7 @@ while (true) {
                 ));
                 break;
             default:
-                $message = urlencode($response->result[0]->message->text);
+                $request_params['text'] = $response->result[0]->message->text;
                 break;
         }
 
@@ -64,11 +64,9 @@ while (true) {
             // Ответ
             // Если клавиатура есть
             if ($keyboard === '') {
-                $data = json_decode(file_get_contents('https://api.telegram.org/bot' . $token
-                    . '/sendMessage?chat_id=' . $chat_id . '&text=' . $message));
+                $telegram->sendMessage($request_params);
             } else { // достаточно спросить один раз
-                $data = json_decode(file_get_contents('https://api.telegram.org/bot' . $token
-                      . '/sendMessage?chat_id=' . $chat_id . '&text=' . $message . '&reply_markup=' . $keyboard));
+                $telegram->sendMessage($request_params, $keyboard);
                 break;
             }
         }
@@ -79,21 +77,22 @@ while (true) {
         echo "OK\n";
 
         // Иначе, если ответ на /repeat
-    } elseif (count($response->result) !== 0 && array_key_exists('callback_query', $response->result[0])) {
+    } elseif ($telegram->typeResponse($response) === 'button_click') {
         $button = $response->result[0]->callback_query->data;
-        $chat_id = $response->result[0]->callback_query->message->chat->id;
         $repeat = (int) substr($button, -1);
-        $message = 'Количество повторений изменено на ' . $repeat;
-        $data = json_decode(file_get_contents('https://api.telegram.org/bot' . $token
-            . '/sendMessage?chat_id=' . $chat_id . '&text=' . $message));
+        $request_params = [
+            'chat_id' => $response->result[0]->callback_query->message->chat->id,
+            'text'    => 'Количество повторений изменено на ' . $repeat,
+        ];
+        // Отправка сообщения
+        $telegram->sendMessage($request_params);
 
+        // Отметка, что запрос выполнен
         $callback_query_id = $response->result[0]->callback_query->id;
-
-        $data1 = json_decode(file_get_contents('https://api.telegram.org/bot' . $token
-            . '/answerCallbackQuery?callback_query_id=' . $callback_query_id));
-        print_r($response);
+        $telegram->sendMessageCallback($callback_query_id);
 
         $update_id = $response->result[0]->update_id;
+        // Увеличить индекс события
         $update_id++;
         echo "OK\n";
     }
