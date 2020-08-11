@@ -3,3 +3,6 @@ config.php
 .vscode
 .history
 /.idea/
+/tests/dataForTest.php
+/tests/dataForTestTelegram.txt
+/tests/dataForTestVk.txt
