@@ -17,6 +17,10 @@
     "autoload": {
         "psr-4": {
             "Bot\\": "src/"
-        }
+        },
+        "files": [
+            "config.php",
+            "tests/dataForTesting.php"
+        ]
 }
 }
