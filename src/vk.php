@@ -3,9 +3,6 @@
 namespace Bot\api;
 
 require_once __DIR__ . '/../vendor/autoload.php';
-require_once __DIR__ . '/../config.php';
-
-$group_id    = 197571527;
 
 // Запрос сессии
 $vk     = new VkApi(
@@ -13,7 +10,7 @@ $vk     = new VkApi(
     DESCRIPTION,
     QUESTION_FOR_REPEAT,
     NUMBER_OF_REPETITIONS,
-    $group_id,
+    VK_GROUP_ID,
 );
 
 while (true) {

@@ -66,7 +66,10 @@ class TelegramApi
      */
     public function typeResponse($response): string
     {
-        if (array_key_exists('message', $response->result[0])) {
+        if (
+            array_key_exists('message', $response->result[0]) &&
+            array_key_exists('text', $response->result[0]->message)
+        ) {
             return 'not_button_click';
         } elseif (array_key_exists('callback_query', $response->result[0])) {
             return 'button_click';
@@ -80,10 +83,12 @@ class TelegramApi
      *
      * @param object $response
      *
-     * @return void
+     * @return string
      */
-    public function processingResponse(object $response): void
+    public function processingResponse(object $response): string
     {
+        // Для получения данных для тестирования раскомментируйте строку
+        //file_put_contents('tests\dataForTestTelegram.txt', json_encode($response));
         // Разбор полученного ответа
         $requestParams = [
             'chat_id' => $response->result[0]->message->chat->id,
@@ -93,19 +98,23 @@ class TelegramApi
         switch ($response->result[0]->message->text) {
             case '/help':
                 $this->sendMessageHelp($requestParams);
+                $word = 'help';
                 break;
             case '/repeat':
                 $this->sendMessageRepeat($requestParams);
+                $word = 'repeat';
                 break;
             default:
                 $requestParams['text'] = $response->result[0]->message->text;
                 $this->sendMessageDefault($requestParams, $this->repetitions);
+                $word = 'another';
                 break;
         }
 
         $this->updateId = $response->result[0]->update_id;
         // Увеличить индекс события
         $this->updateId++;
+        return $word;
     }
 
     /**
@@ -117,8 +126,8 @@ class TelegramApi
      */
     public function sendMessageHelp(array $params)
     {
-        $params['text']         = $this->description;
-        $getParams             = http_build_query($params);
+        $params['text'] = $this->description;
+        $getParams      = http_build_query($params);
 
         $answer = json_decode(file_get_contents('https://api.telegram.org/bot' . $this->accessToken
             . '/sendMessage?' . $getParams));
@@ -242,5 +251,36 @@ class TelegramApi
     {
         file_get_contents('https://api.telegram.org/bot' . $this->accessToken
             . '/answerCallbackQuery?callback_query_id=' . $callbackId);
+    }
+
+    /**
+     * Отправка сообщения.
+     *
+     * @param array $params
+     * @param int   $repeat
+     *
+     * @return void
+     */
+    public function sendMessageSpecial($response)
+    {
+        $params = [
+            'chat_id' => $response->result[0]->message->chat->id,
+            'text'    => 'Невозможно выполнить'
+        ];
+        $getParams = http_build_query($params);
+        $answer = json_decode(file_get_contents(
+            'https://api.telegram.org/bot' . $this->accessToken
+            . '/sendMessage?' . $getParams
+        ));
+
+        if (is_null($answer) === true) {
+            $this->logger->error('Неверная реакция на присланное сообщение!');
+        } else {
+            $this->logger->info('Сообщение отправлено успешно.');
+        }
+
+        $this->updateId = $response->result[0]->update_id;
+        // Увеличить индекс события
+        $this->updateId++;
     }
 }

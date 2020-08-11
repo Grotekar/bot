@@ -112,12 +112,14 @@ class VkApi
     /**
      * Обработка полученного сообщения от пользователя.
      *
-     * @param object $response
+     * @param $response
      *
-     * @return void
+     * @return string
      */
-    public function processingResponse(object $response): void
+    public function processingResponse($response): string
     {
+        // Для получения данных для тестирования раскомментируйте строку
+        //file_put_contents('tests\dataForTestVk.txt', json_encode($response));
         // Разбор полученного ответа
         $object = $response->updates[0]->object;
         $requestParams = [
@@ -133,18 +135,26 @@ class VkApi
         switch ($object->text) {
             case '/help':
                 $this->sendMessageHelp($requestParams);
+                $word = 'help';
                 break;
             case '/repeat':
                 $this->sendMessageRepeat($requestParams);
+                $word = 'repeat';
                 break;
             default:
-                $requestParams['message'] = $object->text;
+                if ($object->text !== '') {
+                    $requestParams['message'] = $object->text;
+                } else {
+                    $requestParams['message'] = 'Невозможно выполнить';
+                }
                 $this->sendMessageDefault($requestParams, $this->repetitions);
+                $word = 'another';
                 break;
         }
 
         // Обновление номера последнего события
         $this->ts = $response->ts;
+        return $word;
     }
 
     /**
@@ -156,8 +166,8 @@ class VkApi
      */
     public function sendMessageHelp(array $params)
     {
-        $params['message']      = $this->description;
-        $getParams             = http_build_query($params);
+        $params['message'] = $this->description;
+        $getParams         = http_build_query($params);
 
         $answer = json_decode(file_get_contents('https://api.vk.com/method/messages.send?'
             . $getParams));

@@ -3,7 +3,6 @@
 namespace Bot\api;
 
 require_once __DIR__ . '/../vendor/autoload.php';
-require_once __DIR__ . '/../config.php';
 
 $telegram    = new TelegramApi(
     TELEGRAM_API_ACCESS_TOKEN,
@@ -20,11 +19,14 @@ while (true) {
 
     // Если ответ существует и это обычное сообщение (не ответ на /repeat)
     if ($telegram->typeResponse($response) === 'not_button_click') {
+        // Анализ полученного сообщения
         $telegram->processingResponse($response);
 
     // Иначе, если ответ на /repeat
     } elseif ($telegram->typeResponse($response) === 'button_click') {
         // Изменить количество повторений
         $telegram->editNumberRepetitions($response);
+    } elseif ($telegram->typeResponse($response) === 'unknown') {
+        $telegram->sendMessageSpecial($response);
     }
 }
