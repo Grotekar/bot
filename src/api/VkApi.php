@@ -7,8 +7,8 @@ use Psr\Log\LoggerInterface;
 
 /**
  * Описывает методы для использования к VK Api
- *
  */
+
 class VkApi
 {
     private string $accessToken;
@@ -24,6 +24,7 @@ class VkApi
 
     /**
      * VkApi constructor.
+     *
      * @param string $token
      * @param string $description
      * @param string $questionForRepeat
@@ -57,13 +58,14 @@ class VkApi
     {
         $query = json_decode(file_get_contents(
             'https://api.vk.com/method/groups.getLongPollServer?group_id='
-            . $groupId . '&enabled=1&v=5.101&access_token=' . $this->accessToken
+            . $groupId . '&enabled=1&v=5.101&access_token='
+            . $this->accessToken . '&wait=25'
         ));
 
         if (array_key_exists('error', $query) === true) {
             $this->logger->critical(
                 'Проблема с group_id. Сообщение от Api: {error_msg}.',
-                array('error_msg' => $query->error->error_msg)
+                ['error_msg' => $query->error->error_msg]
             );
             die();
         } else {
@@ -83,7 +85,9 @@ class VkApi
     public function listenEvent()
     {
         do {
-            $response = json_decode(file_get_contents("{$this->server}?act=a_check&key={$this->key}&ts={$this->ts}"));
+            $response = json_decode(file_get_contents(
+                "{$this->server}?act=a_check&key={$this->key}&ts={$this->ts}"
+            ));
         } while (count($response->updates) === 0);
 
         $this->logger->info('Получено сообщение');
@@ -175,12 +179,13 @@ class VkApi
         if (array_key_exists('error', $answer) === true) {
             $this->logger->error(
                 'Неверная реакция на /help! Сообщение от Api: {error_msg}.',
-                array('error_msg' => $answer->error->error_msg)
+                ['error_msg' => $answer->error->error_msg]
             );
         } else {
             $this->logger->info(
-                'Сообщение отправлено успешно в ответ на /help. Идентификатор сообщения {id}.',
-                array('id' => $answer->response)
+                'Сообщение отправлено успешно в ответ на /help.'
+                . 'Идентификатор сообщения {id}.',
+                ['id' => $answer->response]
             );
         }
     }
@@ -194,51 +199,52 @@ class VkApi
      */
     public function sendMessageRepeat(array $params)
     {
-        $params['message']      = 'Сейчас повторяю ' . $this->repetitions . " раз\n" . $this->question;
-        $getParams             = http_build_query($params);
-        $keyboard = json_encode(array(
+        $params['message'] = 'Сейчас повторяю '
+                           . $this->repetitions . " раз\n" . $this->question;
+        $getParams         = http_build_query($params);
+        $keyboard          = json_encode([
             "one_time" => true,
-            "buttons"  => array(
-                array(
-                    array(
-                        "action" => array(
+            "buttons"  => [
+                [
+                    [
+                        "action" => [
                             "type" => "text",
                             "payload" => '{"button":"1"}',
                             "label" => "1"
-                        )
-                    ),
-                    array(
-                        "action" => array(
+                        ]
+                    ],
+                    [
+                        "action" => [
                             "type" => "text",
                             "payload" => '{"button":"2"}',
                             "label" => "2"
-                        )
-                    ),
-                    array(
-                        "action" => array(
+                        ]
+                    ],
+                    [
+                        "action" => [
                             "type" => "text",
                             "payload" => '{"button":"3"}',
                             "label" => "3"
-                        )
-                    ),
-                    array(
-                        "action" => array(
+                        ]
+                    ],
+                    [
+                        "action" => [
                             "type" => "text",
                             "payload" => '{"button":"4"}',
                             "label" => "4"
-                        )
-                    ),
-                    array(
-                        "action" => array(
+                        ]
+                    ],
+                    [
+                        "action" => [
                             "type" => "text",
                             "payload" => '{"button":"5"}',
                             "label" => "5"
-                        )
-                    ),
-                )
-            ),
+                        ]
+                    ],
+                ]
+            ],
             'inline'   => false
-        ));
+        ]);
 
         $answer = json_decode(file_get_contents('https://api.vk.com/method/messages.send?'
             . $getParams . '&keyboard=' . $keyboard));
@@ -246,21 +252,25 @@ class VkApi
         if (array_key_exists('error', $answer) === true) {
             $this->logger->error(
                 'Неверная реакция на /repeat! Сообщение от Api: {error_msg}.',
-                array('error_msg' => $answer->error->error_msg)
+                ['error_msg' => $answer->error->error_msg]
             );
         } else {
             $this->logger->info(
-                'Сообщение отправлено успешно в ответ на /repeat. Идентификатор сообщения {id}.',
-                array('id' => $answer->response)
+                'Сообщение отправлено успешно в ответ на /repeat.'
+                . 'Идентификатор сообщения {id}.',
+                ['id' => $answer->response]
             );
         }
     }
 
     /**
      * Изменение числа повторений
+     *
      * @param object $response
+     *
+     * @return void
      */
-    public function editNumberRepetitions(object $response)
+    public function editNumberRepetitions(object $response): void
     {
         // Получить номер кнопки
         $button            = json_decode($response->updates[0]->object->payload);
@@ -273,7 +283,8 @@ class VkApi
             'v'            => $this->apiVersion,
             'access_token' => $this->accessToken,
         ];
-        $requestParams['message'] = 'Количество повторений изменено на ' . $this->repetitions;
+        $requestParams['message'] = 'Количество повторений изменено на '
+            . $this->repetitions;
 
         // Отправка сообщения
         $this->sendMessageDefault($requestParams);
@@ -295,19 +306,22 @@ class VkApi
 
         // Вывод сообщения $repeat раз
         for ($i = 0; $i < $repeat; $i++) {
-            $answer = json_decode(file_get_contents('https://api.vk.com/method/messages.send?'
-                . $getParams));
+            $answer = json_decode(file_get_contents(
+                'https://api.vk.com/method/messages.send?'
+                . $getParams
+            ));
         }
 
         if (array_key_exists('error', $answer) === true) {
             $this->logger->error(
-                'Неверная реакция на присланное сообщение! Сообщение от Api: {error_msg}.',
-                array('error_msg' => $answer->error->error_msg)
+                'Неверная реакция на присланное сообщение! '
+                . 'Сообщение от Api: {error_msg}.',
+                ['error_msg' => $answer->error->error_msg]
             );
         } else {
             $this->logger->info(
                 'Сообщение отправлено успешно. Идентификатор сообщения {id}.',
-                array('id' => $answer->response)
+                ['id' => $answer->response]
             );
         }
     }
