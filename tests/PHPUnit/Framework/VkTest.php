@@ -13,13 +13,7 @@ class VkTest extends TestCase
      */
     public function setUp(): void
     {
-        $this->vk = new VkApi(
-            VK_API_ACCESS_TOKEN,
-            DESCRIPTION,
-            QUESTION_FOR_REPEAT,
-            NUMBER_OF_REPETITIONS,
-            197571527
-        );
+        $this->vk = new VkApi();
     }
 
     /**

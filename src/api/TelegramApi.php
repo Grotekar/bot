@@ -3,11 +3,11 @@
 namespace Bot\api;
 
 use Bot\Utils\Logger;
+use Dotenv\Dotenv;
 use Psr\Log\LoggerInterface;
 
 /**
  * Описывает методы для использования Telegram Api
- *
  */
 class TelegramApi
 {
@@ -15,29 +15,20 @@ class TelegramApi
     private string $description;
     private string $question;
     private int $repetitions;
-    private int $updateId;
+    private int $updateId = -1;
     private LoggerInterface $logger;
 
     /**
      * TelegramApi constructor.
-     * @param string $token
-     * @param string $description
-     * @param string $questionForRepeat
-     * @param int $numberOfRepetitions
-     * @param int $updateId
      */
-    public function __construct(
-        string $token,
-        string $description,
-        string $questionForRepeat,
-        int $numberOfRepetitions,
-        int $updateId
-    ) {
-        $this->accessToken = $token;
-        $this->description = $description;
-        $this->question    = $questionForRepeat;
-        $this->repetitions = $numberOfRepetitions;
-        $this->updateId    = $updateId;
+    public function __construct()
+    {
+        $dotenv            = Dotenv::createImmutable(__DIR__ . '/../..');
+        $dotenv->load();
+        $this->accessToken = $_SERVER['TELEGRAM_API_ACCESS_TOKEN'];
+        $this->description = $_SERVER['DESCRIPTION'];
+        $this->question    = $_SERVER['QUESTION_FOR_REPEAT'];
+        $this->repetitions = $_SERVER['NUMBER_OF_REPETITIONS'];
         $this->logger      = new Logger();
     }
 
@@ -50,7 +41,7 @@ class TelegramApi
     {
         do {
             $response = json_decode(file_get_contents('https://api.telegram.org/bot' . $this->accessToken
-                  . '/getUpdates?offset=' . $this->updateId));
+                  . '/getUpdates?offset=' . $this->updateId . '&timeout=25'));
         } while (count($response->result) === 0);
 
         $this->logger->info('Получено сообщение');
@@ -67,8 +58,8 @@ class TelegramApi
     public function typeResponse($response): string
     {
         if (
-            array_key_exists('message', $response->result[0]) &&
-            array_key_exists('text', $response->result[0]->message)
+            array_key_exists('message', $response->result[0])
+            && array_key_exists('text', $response->result[0]->message)
         ) {
             return 'not_button_click';
         } elseif (array_key_exists('callback_query', $response->result[0])) {
@@ -129,8 +120,10 @@ class TelegramApi
         $params['text'] = $this->description;
         $getParams      = http_build_query($params);
 
-        $answer = json_decode(file_get_contents('https://api.telegram.org/bot' . $this->accessToken
-            . '/sendMessage?' . $getParams));
+        $answer = json_decode(file_get_contents(
+            'https://api.telegram.org/bot' . $this->accessToken
+            . '/sendMessage?' . $getParams
+        ));
 
         if (is_null($answer) === true) {
             $this->logger->error('Неверная реакция на /help!');
@@ -148,37 +141,40 @@ class TelegramApi
      */
     public function sendMessageRepeat(array $params)
     {
-        $params['text'] = 'Сейчас повторяю ' . $this->repetitions . " раз\n" . QUESTION_FOR_REPEAT;
+        $params['text'] = 'Сейчас повторяю '
+                        . $this->repetitions . " раз\n" . $this->question;
         $get_params     = http_build_query($params);
-        $keyboard       = json_encode(array(
-            "inline_keyboard" => array(
-                array(
-                    array(
+        $keyboard       = json_encode([
+            "inline_keyboard" => [
+                [
+                    [
                         "text" => "1",
                         "callback_data" => "button1"
-                    ),
-                    array(
+                    ],
+                    [
                         "text" => "2",
                         "callback_data" => "button2"
-                    ),
-                    array(
+                    ],
+                    [
                         "text" => "3",
                         "callback_data" => "button3"
-                    ),
-                    array(
+                    ],
+                    [
                         "text" => "4",
                         "callback_data" => "button4"
-                    ),
-                    array(
+                    ],
+                    [
                         "text" => "5",
                         "callback_data" => "button5"
-                    )
-                )
-            )
-        ));
+                    ]
+                ]
+            ]
+        ]);
 
-        $answer = json_decode(file_get_contents('https://api.telegram.org/bot' . $this->accessToken
-            . '/sendMessage?' . $get_params . '&reply_markup=' . $keyboard));
+        $answer = json_decode(file_get_contents(
+            'https://api.telegram.org/bot' . $this->accessToken
+            . '/sendMessage?' . $get_params . '&reply_markup=' . $keyboard
+        ));
 
         if (is_null($answer) === true) {
             $this->logger->error('Неверная реакция на /repeat!');
@@ -191,9 +187,12 @@ class TelegramApi
 
     /**
      * Изменение числа повторений
+     *
      * @param object $response
+     *
+     * @return void
      */
-    public function editNumberRepetitions(object $response)
+    public function editNumberRepetitions(object $response): void
     {
         // Получить номер кнопки
         $button = $response->result[0]->callback_query->data;
@@ -246,8 +245,10 @@ class TelegramApi
      * Отметка, что запрос выполнен
      *
      * @param $callbackId
+     *
+     * @return void
      */
-    public function sendMessageCallback($callbackId)
+    public function sendMessageCallback($callbackId): void
     {
         file_get_contents('https://api.telegram.org/bot' . $this->accessToken
             . '/answerCallbackQuery?callback_query_id=' . $callbackId);
@@ -256,8 +257,7 @@ class TelegramApi
     /**
      * Отправка сообщения.
      *
-     * @param array $params
-     * @param int   $repeat
+     * @param array $response
      *
      * @return void
      */

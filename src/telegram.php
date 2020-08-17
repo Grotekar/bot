@@ -4,13 +4,7 @@ namespace Bot\api;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-$telegram    = new TelegramApi(
-    TELEGRAM_API_ACCESS_TOKEN,
-    DESCRIPTION,
-    QUESTION_FOR_REPEAT,
-    NUMBER_OF_REPETITIONS,
-    -1
-);
+$telegram    = new TelegramApi();
 
 // Ожидание сообщения
 while (true) {

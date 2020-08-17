@@ -17,7 +17,7 @@ class Logger extends AbstractLogger
     public function log($level, $message, array $context = array())
     {
         // Какой уровень логирования установлен
-        $levelToNumber = LOG_LEVEL;
+        $levelToNumber = $_SERVER['LOG_LEVEL'];
         switch ($level) {
             case 'emergency':
                 $levelToNumber = 1;
@@ -45,7 +45,7 @@ class Logger extends AbstractLogger
                 break;
         }
 
-        if ($levelToNumber <= LOG_LEVEL) {
+        if ($levelToNumber <= $_SERVER['LOG_LEVEL']) {
             // Построение массива подстановки с фигурными скобками
             // вокруг значений ключей массива context.
             $replace = array();

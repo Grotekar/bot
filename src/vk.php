@@ -5,13 +5,7 @@ namespace Bot\api;
 require_once __DIR__ . '/../vendor/autoload.php';
 
 // Запрос сессии
-$vk     = new VkApi(
-    VK_API_ACCESS_TOKEN,
-    DESCRIPTION,
-    QUESTION_FOR_REPEAT,
-    NUMBER_OF_REPETITIONS,
-    VK_GROUP_ID,
-);
+$vk     = new VkApi();
 
 while (true) {
     // Если ответ существует и это обычное сообщение (не ответ на /repeat)

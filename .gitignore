@@ -1,7 +1,7 @@
 /vendor/
-config.php
-.vscode
-.history
+/.vscode/
+/.history/
+.env
 /.idea/
 /tests/dataForTest.php
 /tests/dataForTestTelegram.txt

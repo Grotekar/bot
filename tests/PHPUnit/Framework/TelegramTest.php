@@ -10,13 +10,7 @@ class TelegramTest extends TestCase
 
     public function setUp(): void
     {
-        $this->telegram = new TelegramApi(
-            TELEGRAM_API_ACCESS_TOKEN,
-            DESCRIPTION,
-            QUESTION_FOR_REPEAT,
-            NUMBER_OF_REPETITIONS,
-            -1
-        );
+        $this->telegram = new TelegramApi();
     }
 
     public function testCommandHelp(): void

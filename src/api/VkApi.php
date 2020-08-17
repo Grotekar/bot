@@ -3,6 +3,7 @@
 namespace Bot\api;
 
 use Bot\Utils\Logger;
+use Dotenv\Dotenv;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -24,27 +25,18 @@ class VkApi
 
     /**
      * VkApi constructor.
-     *
-     * @param string $token
-     * @param string $description
-     * @param string $questionForRepeat
-     * @param int $numberOfRepetitions
-     * @param int $groupId
      */
-    public function __construct(
-        string $token,
-        string $description,
-        string $questionForRepeat,
-        int $numberOfRepetitions,
-        int $groupId
-    ) {
-        $this->accessToken = $token;
-        $this->description = $description;
-        $this->question    = $questionForRepeat;
-        $this->repetitions = $numberOfRepetitions;
-        $this->groupId     = $groupId;
+    public function __construct()
+    {
+        $dotenv            = Dotenv::createImmutable(__DIR__ . '/../..');
+        $dotenv->load();
+        $this->accessToken = $_SERVER['VK_API_ACCESS_TOKEN'];
+        $this->description = $_SERVER['DESCRIPTION'];
+        $this->question    = $_SERVER['QUESTION_FOR_REPEAT'];
+        $this->repetitions = $_SERVER['NUMBER_OF_REPETITIONS'];
+        $this->groupId     = $_SERVER['VK_GROUP_ID'];
         $this->logger      = new Logger();
-        $this->ts          = $this->getSessionByGetLongPollServer($groupId);
+        $this->ts          = $this->getSessionByGetLongPollServer($this->groupId);
     }
 
     /**
@@ -123,7 +115,7 @@ class VkApi
     public function processingResponse($response): string
     {
         // Для получения данных для тестирования раскомментируйте строку
-        //file_put_contents('tests\dataForTestVk.txt', json_encode($response));
+        file_put_contents('tests\dataForTestVk.txt', json_encode($response));
         // Разбор полученного ответа
         $object = $response->updates[0]->object;
         $requestParams = [
