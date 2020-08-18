@@ -115,7 +115,7 @@ class VkApi
     public function processingResponse($response): string
     {
         // Для получения данных для тестирования раскомментируйте строку
-        file_put_contents('tests\dataForTestVk.txt', json_encode($response));
+        //file_put_contents('tests\dataForTestVk.txt', json_encode($response));
         // Разбор полученного ответа
         $object = $response->updates[0]->object;
         $requestParams = [
