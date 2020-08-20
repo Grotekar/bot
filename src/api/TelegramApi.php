@@ -16,6 +16,7 @@ class TelegramApi
     private string $question;
     private int $repetitions;
     private int $updateId = -1;
+    private bool $createTestingData;
     private LoggerInterface $logger;
 
     /**
@@ -23,13 +24,14 @@ class TelegramApi
      */
     public function __construct()
     {
-        $dotenv            = Dotenv::createImmutable(__DIR__ . '/../..');
+        $dotenv                  = Dotenv::createImmutable(__DIR__ . '/../..');
         $dotenv->load();
-        $this->accessToken = $_SERVER['TELEGRAM_API_ACCESS_TOKEN'];
-        $this->description = $_SERVER['DESCRIPTION'];
-        $this->question    = $_SERVER['QUESTION_FOR_REPEAT'];
-        $this->repetitions = $_SERVER['NUMBER_OF_REPETITIONS'];
-        $this->logger      = new Logger();
+        $this->accessToken       = $_SERVER['TELEGRAM_API_ACCESS_TOKEN'];
+        $this->description       = $_SERVER['DESCRIPTION'];
+        $this->question          = $_SERVER['QUESTION_FOR_REPEAT'];
+        $this->repetitions       = $_SERVER['NUMBER_OF_REPETITIONS'];
+        $this->createDataForTest = (bool) $_SERVER['CREATE_DATA_FOR_TEST'];
+        $this->logger            = new Logger();
     }
 
     /**
@@ -78,8 +80,12 @@ class TelegramApi
      */
     public function processingResponse(object $response): string
     {
-        // Для получения данных для тестирования раскомментируйте строку
-        //file_put_contents('tests\dataForTestTelegram.txt', json_encode($response));
+        if ($this->createDataForTest === true) {
+            file_put_contents('tests\dataForTestTelegram.txt', json_encode($response));
+            $this->logger->info(
+                'Добавлена информация для тестирования в файл tests\dataForTestTelegram.txt.txt'
+            );
+        }
         // Разбор полученного ответа
         $requestParams = [
             'chat_id' => $response->result[0]->message->chat->id,
