@@ -41,7 +41,7 @@
 
     composer install
 
-На основе файла [.env.example](https://github.com/Grotekar/bot/.env.example)
+На основе файла [.env.example](https://github.com/Grotekar/bot//blob/master.env.example)
 cоздать файл `.env`. Внести необходимые изменения в созданный файл,
 том числе добавить:
 * токен в переменную **VK_API_ACCESS_TOKEN**;
@@ -82,7 +82,7 @@ cоздать файл `.env`. Внести необходимые измене�
     2. 
         * Для Вконтакте:
         
-            Запустить файл [src/vk.php](https://github.com/Grotekar/bot/src/vk.php)
+            Запустить файл [src/vk.php](https://github.com/Grotekar/bot/blob/master/src/vk.php)
             и отправить боту сообщение с тестом "1" (без кавычек).
             
             В папке **tests** появится файл `dataForTestVk.txt` с данными для запроса. 
@@ -92,7 +92,7 @@ cоздать файл `.env`. Внести необходимые измене�
         
         * Для Телеграм:
         
-            Запустить файл [src/telegram.php](https://github.com/Grotekar/bot/src/telegram.php)
+            Запустить файл [src/telegram.php](https://github.com/Grotekar/bot/blob/master/src/telegram.php)
             и отправить боту сообщение с тестом "1" (без кавычек).
             
             В папке **tests** появится файл `dataForTestTelegram.txt` с данными для запроса. 
@@ -103,38 +103,38 @@ cоздать файл `.env`. Внести необходимые измене�
     3. После этого значение переменной **CREATE_DATA_FOR_TEST** вернуть в значение ***false***.
 
     4. Теперь для тестирования нужно запустить соответствующий
-        файл ([tests\PHPUnit\Framework\VkTest.php](https://github.com/Grotekar/bot/tests/PHPUnit/Framework/VkTest.php)
-        либо [tests\PHPUnit\Framework\TelegramTest.php](https://github.com/Grotekar/bot/tests/PHPUnit/Framework/TelegramTest.php)).
+        файл ([tests\PHPUnit\Framework\VkTest.php](https://github.com/Grotekar/bot/blob/master/tests/PHPUnit/Framework/VkTest.php)
+        либо [tests\PHPUnit\Framework\TelegramTest.php](https://github.com/Grotekar/bot/blob/master/tests/PHPUnit/Framework/TelegramTest.php)).
 
         > **Примечание:** Будте готовы к тому, что бот отправит 
         сообщения тому, кто  отправлял боту сообщение с текстом 1.
 
 ## 6. Описание файлов
-### [src/vk.php](https://github.com/Grotekar/bot/src/vk.php)
+### [src/vk.php](https://github.com/Grotekar/bot/blob/master/src/vk.php)
 Запускает бот для Вконтакте.
 
-### [src/telegram.php](https://github.com/Grotekar/bot/src/telegram.php)
+### [src/telegram.php](https://github.com/Grotekar/bot/blob/master/src/telegram.php)
 Запускает бот для Телеграм.
 
-### [src/api/VkApi.php](https://github.com/Grotekar/bot/src/api/VkApi.php)
+### [src/api/VkApi.php](https://github.com/Grotekar/bot/blob/master/src/api/VkApi.php)
 Класс, описывающий работу с API Вконтакте.
 
-### [src/api/TelegramApi.php](https://github.com/Grotekar/bot/src/api/TelegramApi.php)
+### [src/api/TelegramApi.php](https://github.com/Grotekar/bot/blob/master/src/api/TelegramApi.php)
 Класс, описывающий работу с API Телеграм.
 
-### [src/Utils/Logger.php](https://github.com/Grotekar/bot/src/Utils/Logger.php)
+### [src/Utils/Logger.php](https://github.com/Grotekar/bot/blob/master/src/Utils/Logger.php)
 Класс, содержащий реализацию логирования.
 
-### [.env.example](https://github.com/Grotekar/bot/.env.example)
+### [.env.example](https://github.com/Grotekar/bot/blob/master/.env.example)
 Шаблон для конфигурационного файла.
 
-### [tests\PHPUnit\Framework\VkTest.php](https://github.com/Grotekar/bot/tests/PHPUnit/Framework/VkTest.php)
+### [tests\PHPUnit\Framework\VkTest.php](https://github.com/Grotekar/bot/blob/master/tests/PHPUnit/Framework/VkTest.php)
 Тестирование правильного распознования команд **/help**, 
 **/repeat** и обычного текстового сообщения.
 
-### [tests\PHPUnit\Framework\TelegramTest.php](https://github.com/Grotekar/bot/tests/PHPUnit/Framework/TelegramTest.php)
+### [tests\PHPUnit\Framework\TelegramTest.php](https://github.com/Grotekar/bot/blob/master/tests/PHPUnit/Framework/TelegramTest.php)
 Тестирование правильного распознования команд **/help**, 
 **/repeat** и обычного текстового сообщения.
 
-### [tests\dataForTest.php](https://github.com/Grotekar/bot/tests/dataForTest.php)
+### [tests\dataForTest.php](https://github.com/Grotekar/bot/blob/master/tests/dataForTest.php)
 Файл шаблонов для тестирования ботов.
